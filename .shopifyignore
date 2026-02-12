@@ -1,0 +1,10 @@
+# This file contains a list of files that will be excluded from Shopify CLI
+# operations such as push, pull, dev, etc.
+#
+# Build tooling and source (Tailwind/Vite build outputs go to assets/)
+package.json
+package-lock.json
+pnpm-lock.yaml
+vite.config.js
+node_modules
+src

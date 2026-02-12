@@ -1,0 +1,12 @@
+@import 'tailwindcss' prefix(tw);
+
+@source "../../layout/";
+@source "../../sections/";
+@source "../../snippets/";
+@source "../../blocks/";
+
+@theme {
+  /* Optional: extend with theme settings or custom tokens */
+  /* --color-primary: #333; */
+  /* --breakpoint-lg: 990px; */
+}

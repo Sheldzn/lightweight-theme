@@ -1,0 +1,21 @@
+{
+  "name": "lightweight",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "vite:dev": "cross-env BUILD_WATCH=true vite build --watch",
+    "vite:build": "vite build",
+    "shopify:dev": "shopify theme dev --theme-editor-sync --nodelete --ignore locales/*.json !locales/en.default.schema.json !locales/en.default.json",
+    "dev": "concurrently \"pnpm vite:dev\" \"pnpm shopify:dev\"",
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.6",
+    "concurrently": "^9.1.2",
+    "cross-env": "^10.0.0",
+    "tailwindcss": "^4.1.6",
+    "vite": "^6.3.5",
+    "vite-plugin-clean": "^2.0.1"
+  }
+}
