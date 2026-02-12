@@ -1,0 +1,4 @@
+[environments.dev]
+store = "lightweight-9471.myshopify.com"
+theme = "186313965860"
+password = ""
