@@ -1,0 +1,225 @@
+{% doc %}
+ Renders a lightweight cart drawer that opens when a product is added to the cart.
+
+ The drawer is globally rendered and uses progressive enhancement so that the
+ store continues to work when JavaScript is disabled.
+{% enddoc %}
+
+<aside
+  id="lw-cart-drawer"
+  class="tw:fixed tw:inset-0 tw:z-40 tw:grid tw:grid-cols-1 tw:pointer-events-none tw:invisible"
+  role="dialog"
+  aria-modal="true"
+  aria-hidden="true"
+  aria-labelledby="lw-cart-drawer-title"
+>
+  <div
+    class="tw:bg-slate-900/50 tw:backdrop-blur-sm"
+    data-cart-drawer-overlay
+  ></div>
+
+  <div
+    class="tw:fixed tw:top-0 tw:right-0 tw:h-full tw:w-full tw:sm:w-[26rem] tw:max-w-full tw:bg-white tw:flex tw:flex-col tw:transform tw:translate-x-full tw:transition-transform tw:duration-200 tw:ease-out tw:motion-reduce:transition-none"
+    role="document"
+    data-cart-drawer-panel
+    data-shop-currency="{{ shop.currency }}"
+  >
+    <header class="tw:flex tw:items-center tw:justify-between tw:px-5 tw:py-4 tw:border-b tw:border-slate-200">
+      <h2 id="lw-cart-drawer-title" class="tw:text-lg tw:font-semibold">
+        {{ 'cart.drawer.title' | t }}
+      </h2>
+      <button
+        type="button"
+        class="tw:border-0 tw:bg-transparent tw:px-2 tw:py-1 tw:cursor-pointer tw:text-sm"
+        data-cart-drawer-close
+        aria-label="{{ 'cart.drawer.close_aria' | t }}"
+      >
+        {{ 'cart.drawer.close' | t }}
+      </button>
+    </header>
+
+    <main class="tw:flex-1 tw:overflow-y-auto tw:px-5 tw:py-4">
+      <p
+        class="tw:m-0 tw:text-sm {% unless cart.empty? %}tw:hidden{% endunless %}"
+        data-cart-drawer-empty
+      >
+        {{ 'cart.drawer.empty' | t }}
+      </p>
+      <ul
+        class="tw:list-none tw:p-0 tw:m-0 tw:grid tw:gap-3 {% if cart.empty? %}tw:hidden{% endif %}"
+        data-cart-drawer-items
+      >
+        {%- for item in cart.items limit: 10 -%}
+          <li
+            class="tw:relative tw:flex tw:gap-3 tw:items-start tw:text-sm"
+            data-cart-line-key="{{ item.key }}"
+          >
+            <div
+              class="tw:absolute tw:inset-0 tw:flex tw:items-center tw:justify-center tw:bg-white/80 tw:z-10 tw:hidden"
+              data-cart-line-loading
+              aria-hidden="true"
+            >
+              <span
+                class="tw:inline-flex tw:w-5 tw:h-5 tw:rounded-full tw:border-2 tw:border-slate-300 tw:border-t-transparent tw:animate-spin"
+                aria-hidden="true"
+              ></span>
+            </div>
+            <div class="tw:w-16 tw:h-16 tw:shrink-0 tw:overflow-hidden tw:rounded-md tw:bg-slate-100 tw:flex tw:items-center tw:justify-center">
+              {%- if item.image -%}
+                <img
+                  class="tw:max-w-full tw:max-h-full tw:object-contain"
+                  loading="lazy"
+                  width="64"
+                  height="64"
+                  data-cart-line-image
+                  src="{{ item.image | image_url: width: 128 }}"
+                  alt="{{ item.image.alt | default: item.product.title | escape }}"
+                >
+              {%- else -%}
+                <img
+                  class="tw:max-w-full tw:max-h-full tw:object-contain tw:hidden"
+                  loading="lazy"
+                  width="64"
+                  height="64"
+                  data-cart-line-image
+                  alt=""
+                >
+              {%- endif -%}
+            </div>
+            <div class="tw:flex-1 tw:space-y-1">
+              <div class="tw:font-medium" data-cart-line-title>{{ item.product.title | escape }}</div>
+              {%- if item.variant.title != blank and item.variant.title != 'Default Title' -%}
+                <div class="tw:text-xs tw:text-slate-500" data-cart-line-variant>{{ item.variant.title | escape }}</div>
+              {%- else -%}
+                <div class="tw:text-xs tw:text-slate-500 tw:hidden" data-cart-line-variant></div>
+              {%- endif -%}
+              <div class="tw:flex tw:items-center tw:gap-2">
+                <button
+                  type="button"
+                  class="tw:w-7 tw:h-7 tw:flex tw:items-center tw:justify-center tw:rounded-full tw:border tw:border-slate-300 tw:text-xs tw:cursor-pointer"
+                  data-cart-qty-change="decrement"
+                  data-line-key="{{ item.key }}"
+                  data-current-qty="{{ item.quantity }}"
+                  aria-label="{{ 'cart.drawer.qty_decrease' | t }}"
+                >−</button>
+                <span class="tw:text-xs" data-cart-line-qty>{{ item.quantity }}</span>
+                <button
+                  type="button"
+                  class="tw:w-7 tw:h-7 tw:flex tw:items-center tw:justify-center tw:rounded-full tw:border tw:border-slate-300 tw:text-xs tw:cursor-pointer"
+                  data-cart-qty-change="increment"
+                  data-line-key="{{ item.key }}"
+                  data-current-qty="{{ item.quantity }}"
+                  aria-label="{{ 'cart.drawer.qty_increase' | t }}"
+                >+</button>
+              </div>
+            </div>
+            <div class="tw:text-right tw:text-sm tw:ml-3">
+              <div class="tw:font-medium" data-cart-line-price>
+                {%- if item.original_line_price > item.final_line_price -%}
+                  {{ item.final_line_price | money }}
+                {%- else -%}
+                  {{ item.line_price | money }}
+                {%- endif -%}
+              </div>
+              <div
+                class="tw:text-xs tw:text-slate-400 tw:line-through {% if item.original_line_price <= item.final_line_price %}tw:hidden{% endif %}"
+                data-cart-line-original
+              >
+                {{ item.original_line_price | money }}
+              </div>
+            </div>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </main>
+
+    <template data-cart-drawer-line-template>
+      <li class="tw:relative tw:flex tw:gap-3 tw:items-start tw:text-sm">
+        <div
+          class="tw:absolute tw:inset-0 tw:flex tw:items-center tw:justify-center tw:bg-white/80 tw:z-10 tw:hidden"
+          data-cart-line-loading
+          aria-hidden="true"
+        >
+          <span
+            class="tw:inline-flex tw:w-5 tw:h-5 tw:rounded-full tw:border-2 tw:border-slate-300 tw:border-t-transparent tw:animate-spin"
+            aria-hidden="true"
+          ></span>
+        </div>
+        <div class="tw:w-16 tw:h-16 tw:shrink-0 tw:overflow-hidden tw:rounded-md tw:bg-slate-100 tw:flex tw:items-center tw:justify-center">
+          <img
+            class="tw:max-w-full tw:max-h-full tw:object-contain"
+            loading="lazy"
+            width="64"
+            height="64"
+            data-cart-line-image
+            alt=""
+          >
+        </div>
+        <div class="tw:flex-1 tw:space-y-1">
+          <div class="tw:font-medium" data-cart-line-title></div>
+          <div class="tw:text-xs tw:text-slate-500" data-cart-line-variant hidden></div>
+          <div class="tw:flex tw:items-center tw:gap-2">
+            <button
+              type="button"
+              class="tw:w-7 tw:h-7 tw:flex tw:items-center tw:justify-center tw:rounded-full tw:border tw:border-slate-300 tw:text-xs tw:cursor-pointer"
+              data-cart-qty-change="decrement"
+              data-line-key
+              data-current-qty
+              aria-label="{{ 'cart.drawer.qty_decrease' | t }}"
+            >−</button>
+            <span class="tw:text-xs" data-cart-line-qty></span>
+            <button
+              type="button"
+              class="tw:w-7 tw:h-7 tw:flex tw:items-center tw:justify-center tw:rounded-full tw:border tw:border-slate-300 tw:text-xs tw:cursor-pointer"
+              data-cart-qty-change="increment"
+              data-line-key
+              data-current-qty
+              aria-label="{{ 'cart.drawer.qty_increase' | t }}"
+            >+</button>
+          </div>
+        </div>
+        <div class="tw:text-right tw:text-sm tw:ml-3">
+          <div class="tw:font-medium" data-cart-line-price></div>
+          <div class="tw:text-xs tw:text-slate-400 tw:line-through tw:hidden" data-cart-line-original></div>
+        </div>
+      </li>
+    </template>
+
+    <footer class="tw:border-t tw:border-slate-200 tw:px-5 tw:pt-4 tw:pb-5 tw:grid tw:gap-3">
+      <div class="tw:flex tw:items-center tw:justify-between tw:text-sm">
+        <span class="tw:text-slate-500">
+          {{ 'cart.drawer.subtotal' | t }}
+        </span>
+        <span class="tw:font-semibold tw:text-sm" data-cart-drawer-subtotal>{% unless cart.empty? %}{{ cart.total_price | money }}{% endunless %}</span>
+      </div>
+
+      <div class="tw:grid tw:gap-2">
+        <a
+          href="{{ routes.cart_url }}"
+          class="tw:inline-flex tw:items-center tw:justify-center tw:rounded-full tw:px-4 tw:py-2.5 tw:text-sm tw:no-underline tw:text-center tw:border tw:border-slate-400 tw:bg-transparent"
+        >
+          {{ 'cart.drawer.view_cart' | t }}
+        </a>
+        <a
+          href="{{ routes.cart_url }}#checkout"
+          class="tw:inline-flex tw:items-center tw:justify-center tw:rounded-full tw:px-4 tw:py-2.5 tw:text-sm tw:no-underline tw:text-center tw:border-0 tw:text-white tw:bg-black"
+        >
+          {{ 'cart.drawer.checkout' | t }}
+        </a>
+      </div>
+    </footer>
+  </div>
+</aside>
+
+{% style %}
+  [data-loading="true"] [data-cart-line-loading] {
+    display: flex;
+  }
+  [data-cart-add-busy] {
+    pointer-events: none;
+    position: relative;
+  }
+  [data-cart-add-busy] [data-cart-add-spinner] {
+    display: inline-flex;
+  }
+{% endstyle %}

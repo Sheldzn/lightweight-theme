@@ -17,7 +17,18 @@
     "checkout": "Checkout",
     "title": "Cart",
     "update": "Update",
-    "remove": "Remove"
+    "remove": "Remove",
+    "drawer": {
+      "title": "Cart",
+      "close": "Close",
+      "close_aria": "Close cart drawer",
+      "empty": "Your cart is empty",
+      "subtotal": "Subtotal",
+      "view_cart": "View cart",
+      "checkout": "Checkout",
+      "qty_decrease": "Decrease quantity",
+      "qty_increase": "Increase quantity"
+    }
   },
   "customers": {
     "login": {
